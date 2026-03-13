@@ -1,0 +1,78 @@
+ocr:
+  primary_engine: "easyocr"          # easyocr | trocr | ensemble
+  fallback_engine: "trocr"
+  languages: ["en"]
+  confidence_threshold: 0.6
+  ensemble_voting: true
+
+models:
+  easyocr:
+    gpu: false                        # set true if CUDA available
+    detector: "craft"
+    recognizer: "crnn"
+  trocr:
+    model_name: "microsoft/trocr-base-printed"  # or trocr-large-printed
+    device: "cpu"                     # cpu | cuda
+  llm_corrector:
+    # Hackathon-approved models:
+    model_name: "Qwen/Qwen2-0.5B-Instruct"   # lightweight, fast
+    # Alternatives: "microsoft/phi-2", "google/gemma-2b-it"
+    device: "cpu"
+    max_new_tokens: 64
+    enabled: true
+
+preprocessing:
+  target_size: [1024, 1024]
+  dewarp:
+    enabled: true
+    method: "homography"             # homography | thin_plate_spline
+    tilt_threshold_deg: 5
+  denoise:
+    enabled: true
+    method: "nlm"                    # nlm | gaussian | bilateral
+  enhance:
+    clahe: true
+    sharpen: true
+    night_mode_auto: true            # auto-detect low light
+
+fields:
+  serial_number:
+    pattern: "^[A-Z0-9]{6,20}$"
+    region: "nameplate"
+  kwh:
+    pattern: "^\\d{1,7}\\.\\d{1}$"
+    decimal_digits: 1
+    region: "display"
+  kvah:
+    pattern: "^\\d{1,7}\\.\\d{1}$"
+    decimal_digits: 1
+    region: "display"
+  md_kw:
+    pattern: "^\\d{1,5}\\.\\d{1,2}$"
+    region: "display"
+  demand_kva:
+    pattern: "^\\d{1,5}\\.\\d{1,2}$"
+    region: "display"
+
+quality_flags:
+  blur_threshold: 100.0             # Laplacian variance below = blurry
+  brightness_low: 40
+  brightness_high: 220
+  tilt_max_deg: 30
+  min_display_area_ratio: 0.05     # display must be >= 5% of image
+
+api:
+  host: "0.0.0.0"
+  port: 8000
+  max_image_size_mb: 20
+  allowed_extensions: [".jpg", ".jpeg", ".png", ".bmp", ".tiff"]
+
+batch:
+  input_dir: "data/raw_images"
+  output_dir: "data/processed"
+  workers: 4
+  output_format: "json"            # json | csv | both
+
+logging:
+  level: "INFO"
+  file: "logs/meter_ocr.log"

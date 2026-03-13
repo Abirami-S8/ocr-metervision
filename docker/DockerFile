@@ -1,0 +1,41 @@
+FROM python:3.10-slim
+
+# System deps for OpenCV and image processing
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    libgl1-mesa-glx \
+    libglib2.0-0 \
+    libsm6 \
+    libxext6 \
+    libxrender-dev \
+    libgomp1 \
+    ffmpeg \
+    && rm -rf /var/lib/apt/lists/*
+
+WORKDIR /app
+
+# Copy requirements first for cache layer
+COPY requirements.txt .
+
+# Install Python deps
+RUN pip install --no-cache-dir --upgrade pip && \
+    pip install --no-cache-dir -r requirements.txt
+
+# Copy project
+COPY . .
+
+# Create necessary directories
+RUN mkdir -p data/raw_images data/processed logs
+
+# Pre-download EasyOCR models (CRAFT + CRNN)
+RUN python -c "import easyocr; easyocr.Reader(['en'], gpu=False, verbose=False)" || true
+
+# Download TrOCR model
+RUN python -c "from transformers import TrOCRProcessor, VisionEncoderDecoderModel; \
+    TrOCRProcessor.from_pretrained('microsoft/trocr-base-printed'); \
+    VisionEncoderDecoderModel.from_pretrained('microsoft/trocr-base-printed')" || true
+
+EXPOSE 8000
+EXPOSE 8501
+
+# Default: start API (override with CMD for Streamlit)
+CMD ["uvicorn", "api.main:app", "--host", "0.0.0.0", "--port", "8000"]
