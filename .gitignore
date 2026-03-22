@@ -1,0 +1,22 @@
+# Virtual environments
+venv310/
+venv/
+.venv/
+env/
+
+# Python cache
+__pycache__/
+*.pyc
+*.pyo
+.pytest_cache/
+
+# VS Code
+.vscode/
+
+# Logs
+logs/
+*.log
+
+# Data (optional - comment out if you want data in repo)
+# data/raw_images/
+# data/processed/
