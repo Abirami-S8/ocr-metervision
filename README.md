@@ -57,53 +57,9 @@ The system is fully containerized via Docker and docker-compose, deployable in a
  
 ## Architecture
  
-```
-┌──────────────────────────────────────────────────────────────┐
-│                        VPC / Docker                          │
-│                                                              │
-│  ┌──────────────┐    ┌────────────────────────────────────┐  │
-│  │  QC Dashboard│───▶│  FastAPI Backend (:8000)          │   │
-│  │  HTML        │    │                                    │  │
-│  │  :8000       │    │  /extract        (POST)            │  │
-│  └──────────────┘    │  /batch          (POST)            │  │
-│                      │  /results        (GET)             │  │
-│                      │  /health         (GET)             │  │
-│                      └──────────┬─────────────────────────┘  │
-│                                 │                            │
-│                      ┌──────────▼──────────────┐             │
-│                      │     OCR Pipeline         │            │
-│                      │                          │            │
-│                      │  1. Quality Check        │            │
-│                      │     Blur detection       │            │
-│                      │     Brightness check     │            │
-│                      │     Tilt estimation      │            │
-│                      │                          │            │
-│                      │  2. Preprocessing        │            │
-│                      │     CLAHE enhancement    │            │
-│                      │     NLM denoising        │            │
-│                      │     Perspective dewarp   │            │
-│                      │     LCD region crop      │            │
-│                      │                          │            │
-│                      │  3. OCR Ensemble         │            │
-│                      │     EasyOCR (primary)    │            │
-│                      │     TrOCR (secondary)    │            │
-│                      │     Confidence voting    │            │
-│                      │                          │            │
-│                      │  4. LLM Field Parser     │            │
-│                      │     Qwen2-0.5B-Instruct  │            │
-│                      │     Decimal correction   │            │
-│                      │     OCR error repair     │            │
-│                      │                          │            │
-│                      │                          │            │
-│                      │  5. Validation           │            │
-│                      │     Per-field rules      │            │
-│                      │     Confidence scoring   │            │
-│                      │     Pass/Fail verdict    │            │
-│                      └──────────────────────────┘            │
-│                                                              │
-│  Model Cache (HuggingFace): /root/.cache/huggingface         │
-└──────────────────────────────────────────────────────────────┘
-```
+
+<img width="1027" height="510" alt="image" src="https://github.com/user-attachments/assets/b0a8e9a3-d4f3-46bc-aad3-f4505198b80f" />
+
  
 ---
  
